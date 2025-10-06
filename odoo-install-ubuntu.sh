@@ -22,8 +22,8 @@ echo_yellow() {
 # Function to get and validate Odoo version
 get_odoo_version() {
     while true; do
-        echo_yellow "Enter the Odoo version you want to install (e.g., 18, 15, 12-19):"
-        read -r odoo_version
+        echo ""
+        read -p "$(echo -e ${yellow}"Enter the Odoo version you want to install (e.g., 18, 15, 12-19): "${reset})" odoo_version
         
         # Check if input is empty
         if [[ -z "$odoo_version" ]]; then
