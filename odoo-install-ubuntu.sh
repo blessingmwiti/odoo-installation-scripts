@@ -19,9 +19,54 @@ echo_yellow() {
     echo -e "${yellow}$1${reset}"
 }
 
+# Function to get and validate Odoo version
+get_odoo_version() {
+    while true; do
+        echo_yellow "Enter the Odoo version you want to install (e.g., 18, 15, 12-19):"
+        read -r odoo_version
+        
+        # Check if input is empty
+        if [[ -z "$odoo_version" ]]; then
+            echo_red "Error: Input cannot be empty. Please enter a number."
+            continue
+        fi
+        
+        # Remove any decimal point and digits after it (e.g., 18.0 -> 18, 15.3 -> 15)
+        odoo_version=$(echo "$odoo_version" | sed 's/\..*//')
+        
+        # Check if the value is a valid integer
+        if ! [[ "$odoo_version" =~ ^[0-9]+$ ]]; then
+            echo_red "Error: Only a number is needed. Please enter a valid number."
+            continue
+        fi
+        
+        # Check if the version is in the valid range (12-19)
+        if [[ "$odoo_version" -lt 12 || "$odoo_version" -gt 19 ]]; then
+            echo_red "Error: Odoo version must be between 12 and 19 (inclusive). You entered: $odoo_version"
+            continue
+        fi
+        
+        # If all validations pass, break the loop
+        echo_green "Valid Odoo version: $odoo_version"
+        break
+    done
+    
+    # Return the validated version
+    echo "$odoo_version"
+}
+
 # Start of script
-echo_yellow "This script will install Odoo 18 on any Ubuntu-based distro."
+echo_yellow "This script will install Odoo on any Ubuntu-based distro."
 echo_yellow "You might be asked to enter ROOT password for SUPERUSER privileges."
+echo ""
+
+# Get Odoo version from user
+ODOO_VERSION=$(get_odoo_version)
+ODOO_BRANCH="${ODOO_VERSION}.0"
+
+echo ""
+echo_green "Installing Odoo version ${ODOO_VERSION} (branch ${ODOO_BRANCH})..."
+echo ""
 
 # Update system
 echo_green "Updating system..."
@@ -129,7 +174,7 @@ echo_green "Cloning Odoo repository..."
 if [ -d "/opt/odoo/odoo" ]; then
     echo_yellow "Odoo repository already cloned. Skipping."
 else
-    sudo -u odoo git clone --depth 1 --branch 18.0 https://github.com/odoo/odoo /opt/odoo/odoo || {
+    sudo -u odoo git clone --depth 1 --branch ${ODOO_BRANCH} https://github.com/odoo/odoo /opt/odoo/odoo || {
         echo_red "Failed to clone Odoo repository."
         
     }
@@ -177,7 +222,7 @@ if [ -f "/etc/systemd/system/odoo.service" ]; then
 else
     cat <<EOF | sudo tee /etc/systemd/system/odoo.service
 [Unit]
-Description=Odoo18
+Description=Odoo${ODOO_VERSION}
 Requires=postgresql.service
 After=network.target postgresql.service
 
@@ -225,5 +270,5 @@ sleep 2
 clear
 
 # Completion message
-echo_green "Odoo 18 installation complete. Access it at http://localhost:8069. Change localhost to your server IP if needed. You can view the logs here 'tail -f /var/log/odoo/odoo.log'
+echo_green "Odoo ${ODOO_VERSION} installation complete. Access it at http://localhost:8069. Change localhost to your server IP if needed. You can view the logs here 'tail -f /var/log/odoo/odoo.log'
 "
