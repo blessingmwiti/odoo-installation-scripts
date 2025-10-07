@@ -47,7 +47,7 @@ get_odoo_version() {
         fi
         
         # If all validations pass, break the loop
-        echo_green "Valid Odoo version: $odoo_version"
+        echo_green "Valid Odoo version: $odoo_version" >&2
         break
     done
     
