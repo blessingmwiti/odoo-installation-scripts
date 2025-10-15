@@ -215,6 +215,8 @@ addons_path = /opt/odoo/odoo/addons,/opt/odoo/odoo-custom-addons
 EOF
 fi
 
+sudo chmod a+rwx /etc/odoo.conf
+
 # Set up Odoo systemd service
 echo_green "Setting up Odoo systemd service..."
 if [ -f "/etc/systemd/system/odoo.service" ]; then
